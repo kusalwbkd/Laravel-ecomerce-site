@@ -252,7 +252,7 @@ $new_total=$cart_total-($price*$amount);
 );
 
 return redirect()->back()->with($notification);
-
+//here i have done some changes!
 }
 }
 }
