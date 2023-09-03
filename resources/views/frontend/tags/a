@@ -1,0 +1,724 @@
+<!--    //////////////////// START Product Grid View  ////////////// -->
+
+        <div class="search-result-container ">
+          <div id="myTabContent" class="tab-content category-list">
+            <div class="tab-pane active " id="grid-container">
+              <div class="category-product">
+                <div class="row">
+
+
+
+@foreach($products as $product)
+  <div class="col-sm-6 col-md-4 wow fadeInUp">
+    <div class="products">
+      <div class="product">
+        <div class="product-image">
+          <div class="image"> <a href="{{ url('product/details/'.$product->id.'/'.$product->product_slug_en ) }}"><img  src="{{ asset($product->product_thambnail) }}" alt=""></a> </div>
+          <!-- /.image -->
+
+           @php
+        $amount = $product->selling_price - $product->discount_price;
+        $discount = ($amount/$product->selling_price) * 100;
+        @endphp     
+          
+          <div>
+            @if ($product->discount_price == NULL)
+            <div class="tag new"><span>new</span></div>
+            @else
+            <div class="tag hot"><span>{{ round($discount) }}%</span></div>
+            @endif
+          </div>
+
+
+        </div>
+        <!-- /.product-image -->
+        
+        <div class="product-info text-left">
+          <h3 class="name"><a href="{{ url('product/details/'.$product->id.'/'.$product->product_slug_en ) }}">
+          	@if(session()->get('language') == 'hindi') {{ $product->product_name_hin }} @else {{ $product->product_name_en }} @endif</a></h3>
+          <div class="rating rateit-small"></div>
+          <div class="description"></div>
+
+
+@if ($product->discount_price == NULL)
+<div class="product-price"> <span class="price"> ${{ $product->selling_price }} </span>   </div>
+
+@else
+
+<div class="product-price"> <span class="price"> ${{ $product->discount_price }} </span> <span class="price-before-discount">$ {{ $product->selling_price }}</span> </div>
+@endif
+
+
+
+          
+          <!-- /.product-price --> 
+          
+        </div>
+        <!-- /.product-info -->
+        <div class="cart clearfix animate-effect">
+          <div class="action">
+            <ul class="list-unstyled">
+              <li class="add-cart-button btn-group">
+                <button class="btn btn-primary icon" data-toggle="dropdown" type="button"> <i class="fa fa-shopping-cart"></i> </button>
+                <button class="btn btn-primary cart-btn" type="button">Add to cart</button>
+              </li>
+              <li class="lnk wishlist"> <a class="add-to-cart" href="detail.html" title="Wishlist"> <i class="icon fa fa-heart"></i> </a> </li>
+              <li class="lnk"> <a class="add-to-cart" href="detail.html" title="Compare"> <i class="fa fa-signal"></i> </a> </li>
+            </ul>
+          </div>
+          <!-- /.action --> 
+        </div>
+        <!-- /.cart --> 
+      </div>
+      <!-- /.product --> 
+      
+    </div>
+    <!-- /.products --> 
+  </div>
+  <!-- /.item -->
+  @endforeach
+                  
+                
+
+
+
+
+
+
+
+
+
+                </div>
+                <!-- /.row --> 
+              </div>
+              <!-- /.category-product --> 
+              
+            </div>
+            <!-- /.tab-pane -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <script>
+
+              $.ajaxSetup({
+                 headers:{
+                    'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')
+                 }
+              })
+           
+              function productView(id) {
+             $.ajax({
+               type: 'GET',
+               url: '/product/view/modal/' + id,
+               dataType: 'json',
+               success: function (data) {
+                 $('#pname').text(data.product.product_name);
+                 $('#pname').css('font-weight', 'bold');
+           
+           
+                  if (data.product.discount_price === null) {
+                   $("#pprice").text(data.product.selling_price);
+                 } else {
+                   $("#pprice").text(data.product.discount_price);
+                 }
+           
+                 $('#pcode').text(data.product.product_code); 
+           
+                 $('#product_id').val(id);
+           
+                 $('#qty').val(1);
+           
+                 $('#pcode').css("margin","10px"); 
+           
+                 $('#pcategory').text(data.product.category.category_name);
+                 $('#pcategory').css("margin","10px"); 
+           
+           
+                 $('#pbrand').text(data.product.brand.brand_name); 
+                 $('#pbrand').css('margin', '10px');
+           
+                 if (data.product.status === 1) {
+                   $("#aviable").text("Available");
+           
+                   
+                   
+           
+           
+                 } else {
+           
+                   
+                   $("#stockout").text("Not Available");
+           
+                  
+           
+                 }
+           
+                 $('#pimage').attr('src','/'+data.product.product_thambnail);
+           
+           
+           
+                 // Color
+           
+                 
+                 $('select[name="color"]').empty();        
+           
+                 for (let i = 0; i < data.product_color.length; i++) {
+                   $('select[name="color"]').append(`<option value="${data.product_color[i]}">${data.product_color[i]}</option>`);
+           }
+           
+           
+                
+           
+              // end color
+           
+           
+           
+              $('select[name="size"]').empty();        
+           
+           for (let i = 0; i < data.product_size.length; i++) {
+             $('select[name="size"]').append(`<option value="${data.product_size[i]}">${data.product_size[i]}</option>`);
+           }
+           
+               }
+           
+           
+              
+           
+           
+           
+           
+                } );
+           
+               
+           }
+           
+           
+           //start add to cart
+           
+           
+           function addToCart(){
+           
+           
+             var product_name = $('#pname').text();
+                   var id = $('#product_id').val();
+                   var color = $('#color option:selected').text();
+                   var size = $('#size option:selected').text();
+                   var quantity = $('#qty').val();
+           
+           
+           
+           
+                 console.log(id,color,size,quantity)
+           
+           
+           
+                   $.ajax({
+           
+           
+                     type: "POST",
+                     dataType: 'json',
+                     data:{
+                           color:color, size:size, quantity:quantity, product_name:product_name
+                       },
+           
+                       url: "/cart/data/store/"+id,
+           
+                       success:function(data){
+                           console.log(data)
+                       }
+                   })
+           
+            
+           }
+           
+           
+           //end add to cart
+              </script>
+
+<div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel"><strong><span id="pname"></span> </strong></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="closeModel">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+       
+       <div class="row">
+
+        <div class="col-md-4">
+
+            <div class="card" style="width: 18rem;">
+
+  <img src=" " class="card-img-top" alt="..." style="height: 200px; width: 200px;" id="pimage">
+  
+</div>
+            
+        </div><!-- // end col md -->
+
+
+        <div class="col-md-4">
+
+     <ul class="list-group">
+  <li class="list-group-item">Product Price: <strong class="text-danger">$<span id="pprice"></span></strong>
+<del id="oldprice">$</del>
+   </li>
+  <li class="list-group-item">Product Code: <strong id="pcode"></strong></li>
+  <li class="list-group-item">Category: <strong id="pcategory"></strong></li>
+  <li class="list-group-item">Brand: <strong id="pbrand"></strong></li>
+  <li class="list-group-item">Stock: <span class="badge badge-pill badge-success" id="aviable" style="background: green; color: white;"></span> 
+<span class="badge badge-pill badge-danger" id="stockout" style="background: red; color: white;"></span> 
+
+  </li>
+</ul>
+            
+        </div><!-- // end col md -->
+
+
+        <div class="col-md-4">
+
+            <div class="form-group">
+    <label for="color">Choose Color</label>
+    <select class="form-control" id="color" name="color">
+      
+      
+    </select>
+  </div>  <!-- // end form group -->
+
+
+    <div class="form-group" id="sizeArea">
+    <label for="size">Choose Size</label>
+    <select class="form-control" id="size" name="size">
+      <option>1</option>
+       
+    </select>
+  </div>  <!-- // end form group -->
+
+       <div class="form-group">
+    <label for="qty">Quantity</label>
+    <input type="number" class="form-control" id="qty" value="1" min="1" >
+  </div> <!-- // end form group -->
+
+<input type="hidden" id="product_id">
+<button type="submit" class="btn btn-primary mb-2" onclick="addToCart()" >Add to Cart</button>
+
+            
+        </div><!-- // end col md -->
+
+           
+       </div> <!-- // end row -->
+
+ 
+
+      </div> <!-- // end modal Body -->
+
+
+
+
+
+      $validatedData=$request->validate([
+
+'brand_name_en'=>'string|required|max:255',
+'brand_image'=>'required'],
+[
+    'brand_image.required'=>'please upload an image',
+
+ ]);
+$data=new Brand;
+
+$image=$request->file('brand_image');
+
+$name_gen = hexdec(uniqid()).'.'.$image->getClientOriginalExtension();
+Image::make($image)->resize(300,300)->save('upload/brand/'.$name_gen);
+$save_url = 'upload/brand/'.$name_gen;
+
+ $data->brand_name=$request->brand_name_en;
+ $data->brand_slug	=strtolower(str_replace(' ','-',$request->brand_name_en));
+$data->brand_image=$save_url;
+
+$data->save();
+
+$notification=array(
+    'message' => 'Brand Inserted Succesfully!',
+    'alert-type' => 'success'
+ );
+
+
+
+ 
+
+
+ document.addEventListener("DOMContentLoaded", function() {
+  var categorySelect = document.querySelector('select[name="category_id"]');
+  categorySelect.addEventListener("change", async function() {
+      var category_id = this.value;
+      if (category_id) {
+          try {
+              var response = await fetch("{{  url('/category/subcategory/ajax') }}/" + category_id);
+              var data = await response.json();
+
+              var subcategorySelect = document.querySelector('select[name="subcategory_id"]');
+              subcategorySelect.innerHTML = "";
+
+              data.forEach(function(value) {
+                  var option = document.createElement("option");
+                  option.value = value.id;
+                  option.text = value.subcategory_name;
+                  subcategorySelect.appendChild(option);
+              });
+          } catch (error) {
+              console.error(error);
+          }
+      } else {
+          alert('danger');
+      }
+  });
+});
+
+
+
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+  const categorySelect = document.querySelector('select[name="category_id"]');
+  
+  categorySelect.addEventListener("change",handleCategoryChange);
+  });
+  
+  
+  async function handleCategoryChange(e){
+  
+  
+  const category_id=e.target.value;
+  
+  if(category_id){
+  
+    try {
+  
+      const response=await fetch("{{url('/category/subcategory/select') }}/" + category_id);
+      const data=await response.json();
+  
+      const subcategorySelect = document.querySelector('select[name="subcategory_id"]');
+      subcategorySelect.innerHTML = "";
+  
+      data.forEach(item=>{
+  
+        const option = document.createElement("option");
+        option.value=item.id;
+  
+        option.text=item.subcategory_name;
+        subcategorySelect.appendChild(option);
+      })
+  
+    } catch (error) {
+  
+      console.log("error");
+      
+    }
+  
+  }
+  
+  else{
+  
+  
+  }
+  
+  
+  }
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('select[name="category_id"]').on('change', function(){
+        var category_id = $(this).val();
+        if(category_id) {
+            $.ajax({
+                url: "{{  url('/category/subcategory/ajax') }}/"+category_id,
+                type:"GET",
+                dataType:"json",
+                success:function(data) {
+                   $('select[name="subsubcategory_id"]').html('');
+                   var d =$('select[name="subcategory_id"]').empty();
+                      $.each(data, function(key, value){
+                          $('select[name="subcategory_id"]').append('<option value="'+ value.id +'">' + value.subcategory_name + '</option>');
+                      });
+                },
+            });
+        } else {
+            alert('danger');
+        }
+    });
+
+
+
+$('select[name="subcategory_id"]').on('change', function(){
+        var subcategory_id = $(this).val();
+        if(subcategory_id) {
+            $.ajax({
+                url: "{{  url('/category/sub-subcategory/ajax') }}/"+subcategory_id,
+                type:"GET",
+                dataType:"json",
+                success:function(data) {
+                   var d =$('select[name="subsubcategory_id"]').empty();
+                      $.each(data, function(key, value){
+                          $('select[name="subsubcategory_id"]').append('<option value="'+ value.id +'">' + value.subsubcategory_name + '</option>');
+                      });
+                },
+            });
+        } else {
+            alert('danger');
+        }
+    });
+
+});
+</script>
+<script type="text/javascript">
+function mainThamUrl(input){
+if (input.files && input.files[0]) {
+  var reader = new FileReader();
+  reader.onload = function(e){
+    $('#mainThmb').attr('src',e.target.result).width(80).height(80);
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+}	
+</script>
+
+
+<script>
+
+$(document).ready(function(){
+$('#multiImg').on('change', function(){ //on file input change
+  if (window.File && window.FileReader && window.FileList && window.Blob) //check File API supported browser
+  {
+      var data = $(this)[0].files; //this file data
+       
+      $.each(data, function(index, file){ //loop though each file
+          if(/(\.|\/)(gif|jpe?g|png)$/i.test(file.type)){ //check supported file type
+              var fRead = new FileReader(); //new filereader
+              fRead.onload = (function(file){ //trigger function on successful read
+              return function(e) {
+                  var img = $('<img/>').addClass('thumb').attr('src', e.target.result) .width(80)
+              .height(80); //create image element 
+                  $('#preview_img').append(img); //append image to output element
+              };
+              })(file);
+              fRead.readAsDataURL(file); //URL representing the file's data.
+          }
+      });
+       
+  }else{
+      alert("Your browser doesn't support File API!"); //if File API is absent
+  }
+});
+});
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let cart=[];
+let buttonsDOM=[];
+ 
+
+class Product {
+  async getProducts() {
+    try {
+      let result = await fetch('/product/details');
+      let data = await result.json();
+      let products=data.items;
+
+     
+      return products;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+
+class UI{
+ 
+  getBagBtns(){
+    const buttons= [...document.querySelectorAll(".add_to_cart")];
+    buttonsDOM=buttons;
+
+    buttons.forEach(button=>{
+      let id=button.dataset.id;
+      console.log(id);
+      let inCart=cart.find(item=>item.id === id);
+      if(inCart){
+        button.disabled=true;
+        button.innerText="IN CART"
+      }
+
+      button.addEventListener("click",(e)=>{
+
+        e.target.disabled=true;
+        e.target.innerText="IN CART"
+        e.target.style.backgroundColor="grey";
+       e.preventDefault();
+
+       let cartItem={...Storage.getCartProducts(id)}
+       console.log(Storage.getCartProducts(id));
+       
+
+       
+      })
+    })
+  }
+}
+
+class Storage{
+
+  static saveProducts(products){
+    localStorage.setItem("products",JSON.stringify(products))
+
+  }
+
+ static getCartProducts(id){
+
+    let products=JSON.parse(localStorage.getItem("products"))
+
+   return products.find(product => product.id === id);
+   
+
+  }
+
+
+}
+
+document.addEventListener("DOMContentLoaded",(e)=>{
+
+
+  const products=new Product();
+  const ui=new UI();
+
+ products.getProducts().then(products=>{
+
+Storage.saveProducts(products);
+
+ }).then(()=>{
+
+  ui.getBagBtns();
+ })
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+<tr>
+
+  <td class="romove-item"><a href="#" title="cancel" class="icon"><i class="fa fa-trash-o"></i></a></td>
+  <td class="cart-image">
+    <a class="entry-thumbnail" href="detail.html">
+        <img src="" alt="">
+    </a>
+  </td>
+  <td class="cart-product-name-info">
+    <h4 class='cart-product-description'><a href="detail.html"></a></h4>
+    <div class="row">
+      <div class="col-sm-4">
+        <div class="rating rateit-small"></div>
+      </div>
+      <div class="col-sm-8">
+        <div class="reviews">
+          (06 Reviews)
+        </div>
+      </div>
+    </div><!-- /.row -->
+    <div class="cart-product-info">
+              <span class="product-color">COLOR:<span>Blue</span></span>
+    </div>
+  </td>
+  <td class="cart-product-edit"><a href="#" class="product-edit">Edit</a></td>
+  <td class="cart-product-quantity">
+    <div class="quant-input">
+                <div class="arrows">
+                  <div class="arrow plus gradient"><span class="ir"><i class="icon fa fa-sort-asc"></i></span></div>
+                  <div class="arrow minus gradient"><span class="ir"><i class="icon fa fa-sort-desc"></i></span></div>
+                </div>
+                <input type="text" value="1">
+            </div>
+        </td>
+  <td class="cart-product-sub-total"><span class="cart-sub-total-price">$300.00</span></td>
+  <td class="cart-product-grand-total"><span class="cart-grand-total-price">$300.00</span></td>
+  </tr>
+  
+  
+  
+  
+            
+  <label class="info-title control-label">Choose Color <span> </span></label>
+  <select class="form-control " style="" id="color">
+      <option selected="" disabled="">--Choose Color--</option>
+      @foreach($product_color as $color)
+      <option value="{{$color}}">{{$color}}</option>
+       @endforeach
+  </select> 
