@@ -9,6 +9,8 @@ class AddCouponColumn extends Migration
     /**
      * Run the migrations.
      *
+     * 
+     * sasasasasasaadewreewfefwfewfewewsdhsaidsyhidshids
      * @return void
      */
     public function up()
