@@ -50,7 +50,7 @@
 					</td>
 					<td class="cart-image">
 						<a class="entry-thumbnail" href="detail.html">
-						    <img src="assets/images/products/p1.jpg" alt="">
+<img src="{{ asset($item['product']['product_thambnail']) }}" alt="">
 						</a>
 					</td>
 					<td class="cart-product-name-info">

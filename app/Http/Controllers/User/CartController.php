@@ -16,7 +16,9 @@ use App\Models\Wishlist;
 use App\Models\Cart;
 use App\Models\FullCarttotal;
 use App\Models\Checkoutcart;
-
+use App\Models\Provice;
+use App\Models\District;
+use App\Models\City;
 use Auth;
 use Illuminate\Support\Facades\Hash;
 use Mews\Purifier\Facades\Purifier;
@@ -92,8 +94,9 @@ class CartController extends Controller
      
         }
         else{
-            return response()->json(['error'=>'please login']);
-    
+           // return response()->json(['error'=>'please login','redirect' => route('login')']);
+           return response()->json(['error' => 'Please login', 'redirect' => route('login')]);
+
         }
 
        
@@ -175,23 +178,7 @@ public function CouponRemove(){
     Session::forget('coupon');
     return response()-> json(['warning'=>'coupon removed sucessfully!']);
 }
-public function ProceedCheckout(){
-    $amount_total = FullCarttotal::where('user_id', Auth::id())->sum('carttotal'); // Fetch a single value
 
-    if ($amount_total >0) {
-        return view('frontend.checkout.final_checkout');
-    }
-
-    else{
-        $notification=array(
-            'message' => 'You dont have any items in your cart!',
-            'alert-type' => 'error'
-         );
-
-         return redirect()->to('/')->with($notification);
-    }
-   
-}
 
 
 public function ProductRemove($id){
@@ -255,4 +242,66 @@ return redirect()->back()->with($notification);
 //here i have done some changes!
 }
 }
+
+public function ProceedCheckout(){
+    $amount_total = FullCarttotal::where('user_id', Auth::id())->sum('carttotal'); // Fetch a single value
+$cart_items=Cart::where('user_id',Auth::id())->get();
+$provinces=Provice::all();
+    if ($amount_total >0) {
+        return view('frontend.checkout.final_checkout',compact('cart_items','amount_total','provinces'));
+    }
+
+    else{
+        $notification=array(
+            'message' => 'You dont have any items in your cart!',
+            'alert-type' => 'error'
+         );
+
+         return redirect()->to('/')->with($notification);
+    }
+   
+}
+
+public function DistrictSelect($province_id){
+
+    $districts = District::where('province_id',$province_id)->orderBy('name_en','ASC')->get();
+    return json_encode($districts);
+
+
+}
+public function CitySelect($district_id){
+
+    $cities = City::where('district_id',$district_id)->orderBy('name_en','ASC')->get();
+    return json_encode($cities);
+
+
+}
+
+public function FinalCheckout(Request $request){
+   $data=array();
+
+   $data['shipping_name']=$request->shipping_name;
+   $data['shipping_email']=$request->shipping_email;
+   $data['shipping_phone']=$request->shipping_phone;
+   $data['post_code']=$request->post_code;
+   $data['province_id']=$request->province_id;
+   $data['district_id']=$request->district_id;
+   $data['city_id']=$request->city_id;
+   $data['street_name']=$request->street_name;
+   $data['house_name']=$request->house_name;
+
+   if($request->payment_method == 'stripe'){
+    return view('frontend.payment.stripe',compact('data'));
+   }
+
+   elseif ($request->payment_method == 'card') {
+    return view('frontend.payment.card',compact('data'));
+   }
+   else{
+    return view('frontend.payment.cash',compact('data'));
+   }
+   
+
+}
+
 }

@@ -526,6 +526,7 @@ class UI {
         } else if (data.error) {
           console.log(data.error);
           toastr.error(data.error);
+          window.location.href = data.redirect;
         }
       }
     } catch (error) {

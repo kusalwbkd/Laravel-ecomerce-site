@@ -292,7 +292,10 @@ Route::get('/coupon/remove',[CartController::class, 'CouponRemove']);
 Route::get('/cart/checkout',[CartController::class, 'ProceedCheckout'])->name('checkout');
 
 Route::get('/checkout/item/remove/{id}',[CartController::class, 'ProductRemove'])->name('product.remove');
+Route::get('/provice/district/select/{province}',[CartController::class, 'DistrictSelect']);
+Route::get('/district/city/select/{district}',[CartController::class, 'CitySelect']);
 
 
+Route::post('/checkout/store',[CartController::class, 'FinalCheckout'])->name('checkout.store');
 
 
